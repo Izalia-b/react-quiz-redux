@@ -58,6 +58,25 @@ export function authSuccess(token) {
 }
 
 
-export function autoLogin(){
-  
+export function autoLogin() {
+  //  асинхронная функция dispatch
+  return dispatch => {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      dispatch(logout())
+    } else {
+      //проверка валиден ли токен сейчас
+      //new Date преобразоание в js дату 
+      const expirationDate = new Date(localStorage.getItem('expirationDate'))
+     // токен потерял время жизни
+      if (expirationDate <= new Date()) {
+        dispatch(logout())
+      } else {
+        //залогинимся в систему 
+        dispatch(authSuccess(token))
+        //время жизни истечет
+        dispatch(autoLogout((expirationDate.getTime() - new Date().getTime()) / 1000))//конвертировать обратно дату
+      }
+    }
+  }
 }
